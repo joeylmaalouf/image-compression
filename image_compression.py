@@ -1,7 +1,9 @@
 import cPickle
+import pylab
 import numpy as np
 from numpy import linalg as la
 from PIL import Image
+import seaborn
 import sys
 import warnings
 warnings.simplefilter("ignore", np.ComplexWarning)
@@ -62,6 +64,8 @@ def main(argv):
 		(U, s, Vt) = np.linalg.svd(A)
 		S = np.zeros(A.shape, dtype=complex)
 		S[:mn, :mn] = np.diag(s)
+		kept = []
+		sv = []
 		for i in range(100):
 			cr = (i+1)/100.0 # what % of the data is kept, / 100
 			tmp_U = U[:, :int(cr*U.shape[1])]
@@ -74,6 +78,14 @@ def main(argv):
 				for j in range(tmp_A.shape[1]):
 					pixels[i, j] = tmp_A[i, j]
 			new_im.save(components[0]+"_{0:.2f}.".format(cr)+"".join(components[1:]))
+			kept.append(cr)
+			sv.append(float(S[int(cr*mn)-1, int(cr*mn)-1]))
+			# print("Percent of data kept: {0:3.02f}    Cutoff singular value: {1:9.04f}".format(cr, float(S[int(cr*mn)-1, int(cr*mn)-1])))
+		pylab.plot(kept, sv)
+		pylab.title("Data Impact Graph")
+		pylab.xlabel("Percent of data kept")
+		pylab.ylabel("Cutoff singular value")
+		pylab.show()
 
 	else:
 		print(usage)
